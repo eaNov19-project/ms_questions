@@ -94,4 +94,21 @@ public class QuestionsController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/{questionId}/follow")
+    public ResponseEntity<?> follow(@PathVariable("questionId") String questionId){
+        QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
+        if(questionEntity == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
+        }
+
+        //TODO: get email from token
+        String email = "";
+
+        questionEntity.addFollowerEmail(email);
+        questionEntity = questionRepository.save(questionEntity);
+
+        Response response = new Response(true, "Folowing the question");
+        return ResponseEntity.ok(response);
+    }
+
 }
