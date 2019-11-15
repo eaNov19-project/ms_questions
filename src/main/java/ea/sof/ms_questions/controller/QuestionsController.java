@@ -2,9 +2,11 @@ package ea.sof.ms_questions.controller;
 
 import ea.sof.ms_questions.entity.QuestionEntity;
 import ea.sof.ms_questions.model.QuestionReqModel;
+import ea.sof.ms_questions.pubsub.PubSubQuestionSender;
 import ea.sof.ms_questions.repository.QuestionRepository;
 import ea.sof.shared.models.Question;
 import ea.sof.shared.models.Response;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
@@ -21,9 +23,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/questions")
 public class QuestionsController {
 
-
     @Autowired
     QuestionRepository questionRepository;
+
+    @Autowired
+    PubSubQuestionSender.PubsubOutboundQuestionsGateway questionsSender;
 
     @GetMapping
     public ResponseEntity<?> getAllQuestions(){
@@ -44,9 +48,7 @@ public class QuestionsController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response(false, "No match found"));
         }
 
-        Response response = new Response(true, "");
-        response.getData().put("question", question);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new Response(true, "question", question));
     }
 
     @PostMapping
@@ -55,7 +57,9 @@ public class QuestionsController {
 
         Response response = new Response(true, "Question has been created");
         questionEntity = questionRepository.save(questionEntity);
-        response.getData().put("question", questionEntity);
+        response.addObject("question", questionEntity);
+
+        questionsSender.sendToPubsub(new JSONObject(questionEntity).toString());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -73,7 +77,7 @@ public class QuestionsController {
         questionEntity = questionRepository.save(questionEntity);
 
         Response response = new Response(true, "Question upvoted");
-        response.getData().put("question", questionEntity);
+        response.addObject("question", questionEntity);
 
         return ResponseEntity.ok(response);
     }
