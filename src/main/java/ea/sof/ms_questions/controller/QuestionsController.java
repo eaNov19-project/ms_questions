@@ -57,7 +57,7 @@ public class QuestionsController {
         questionEntity = questionRepository.save(questionEntity);
         response.getData().put("question", questionEntity);
 
-        return ResponseEntity.status(201).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 
@@ -66,7 +66,7 @@ public class QuestionsController {
 //        model.getAttribute("tokendata");
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
         if(questionEntity == null) {
-            return ResponseEntity.status(400).body(new Response(false, "No match found"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
         }
 
         questionEntity.upvote();
