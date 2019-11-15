@@ -76,6 +76,7 @@ public class QuestionsController {
 
         return ResponseEntity.ok(response);
     }
+
     @PatchMapping("/{questionId}/downvote")
     public ResponseEntity<?> downvote(@PathVariable("questionId") String questionId){
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);

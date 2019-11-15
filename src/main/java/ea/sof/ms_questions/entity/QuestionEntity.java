@@ -2,7 +2,7 @@ package ea.sof.ms_questions.entity;
 
 import ea.sof.ms_questions.model.QuestionReqModel;
 import ea.sof.shared.entities.AnswerEntity;
-import ea.sof.shared.entities.CommentEntity;
+import ea.sof.shared.entities.CommentQuestionEntity;
 import ea.sof.shared.models.Question;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +26,7 @@ public class QuestionEntity {
     private LocalDateTime created;
     private LocalDateTime lastEdited;
     private Integer votes = 0;
-    private List<CommentEntity> topComments = new ArrayList<>();
+    private List<CommentQuestionEntity> topComments = new ArrayList<>();
     private List<AnswerEntity> topAnswers = new ArrayList<>();
 
     private List<String> followers = new ArrayList<>();
