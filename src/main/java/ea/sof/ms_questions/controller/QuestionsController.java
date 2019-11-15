@@ -62,7 +62,7 @@ public class QuestionsController {
 
 
     @PatchMapping("/{questionId}/upvote")
-    public ResponseEntity<?> upvote(@PathVariable("questionId") String questionId){
+    public ResponseEntity<?> upvote(@PathVariable("questionId") String questionId, Model model){
 //        model.getAttribute("tokendata");
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
         if(questionEntity == null) {
