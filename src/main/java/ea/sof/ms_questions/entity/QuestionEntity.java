@@ -29,7 +29,7 @@ public class QuestionEntity {
     private List<CommentQuestionEntity> topComments = new ArrayList<>();
     private List<AnswerEntity> topAnswers = new ArrayList<>();
 
-    private List<String> followers = new ArrayList<>();
+    private List<String> followerEmails = new ArrayList<>();
 
     public QuestionEntity(QuestionReqModel questionModel) {
         this.title = questionModel.getTitle();
@@ -40,7 +40,7 @@ public class QuestionEntity {
         //TODO: Add user id from logged in user token
     }
 
-    public Question toQuestionModel(){
+    public Question toQuestionModel() {
         Question questionModel = new Question();
         questionModel.setId(this.id);
         questionModel.setUserId(this.userId);
@@ -53,11 +53,16 @@ public class QuestionEntity {
         return questionModel;
     }
 
-    public void upvote(){
+    public void upvote() {
         this.votes++;
     }
-    public void downvote(){
+
+    public void downvote() {
         this.votes--;
+    }
+
+    public void addFollowerEmail(String email) {
+        followerEmails.add(email);
     }
 
 }

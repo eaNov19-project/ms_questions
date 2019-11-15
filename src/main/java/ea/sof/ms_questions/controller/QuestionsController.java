@@ -9,6 +9,7 @@ import ea.sof.shared.models.Response;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +45,7 @@ public class QuestionsController {
 
         QuestionEntity question = questionRepository.findById(id).orElse(null);
         if(question == null) {
-            return ResponseEntity.status(404).body(new Response(false, "No match found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response(false, "No match found"));
         }
 
         return ResponseEntity.ok(new Response(true, "question", question));
@@ -60,7 +61,7 @@ public class QuestionsController {
 
         questionsSender.sendToPubsub(new JSONObject(questionEntity).toString());
 
-        return ResponseEntity.status(201).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 
@@ -69,7 +70,7 @@ public class QuestionsController {
 //        model.getAttribute("tokendata");
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
         if(questionEntity == null) {
-            return ResponseEntity.status(400).body(new Response(false, "No match found"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
         }
 
         questionEntity.upvote();
@@ -85,7 +86,7 @@ public class QuestionsController {
     public ResponseEntity<?> downvote(@PathVariable("questionId") String questionId){
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
         if(questionEntity == null) {
-            return ResponseEntity.status(400).body(new Response(false, "No match found"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
         }
 
         questionEntity.downvote();
@@ -94,6 +95,23 @@ public class QuestionsController {
         Response response = new Response(true, "Question downvoted");
         response.getData().put("question", questionEntity);
 
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{questionId}/follow")
+    public ResponseEntity<?> follow(@PathVariable("questionId") String questionId){
+        QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
+        if(questionEntity == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
+        }
+
+        //TODO: get email from token
+        String email = "";
+
+        questionEntity.addFollowerEmail(email);
+        questionEntity = questionRepository.save(questionEntity);
+
+        Response response = new Response(true, "Folowing the question");
         return ResponseEntity.ok(response);
     }
 
