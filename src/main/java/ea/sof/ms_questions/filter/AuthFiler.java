@@ -12,12 +12,17 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-//@Component
+@Component
 public class AuthFiler implements Filter {
     @Autowired
     AuthService authService;
 
     private Gson gson = new Gson();
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -44,4 +49,10 @@ public class AuthFiler implements Filter {
         }
 
     }
+
+    @Override
+    public void destroy() {
+
+    }
+
 }

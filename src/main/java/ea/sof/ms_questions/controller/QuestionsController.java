@@ -6,7 +6,6 @@ import ea.sof.ms_questions.pubsub.PubSubQuestionSender;
 import ea.sof.ms_questions.repository.QuestionRepository;
 import ea.sof.shared.models.Question;
 import ea.sof.shared.models.Response;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
@@ -26,8 +25,8 @@ public class QuestionsController {
     @Autowired
     QuestionRepository questionRepository;
 
-    @Autowired
-    PubSubQuestionSender.PubsubOutboundQuestionsGateway questionsSender;
+//    @Autowired
+//    PubSubQuestionSender.PubsubOutboundQuestionsGateway questionsSender;
 
     @GetMapping
     public ResponseEntity<?> getAllQuestions(){
@@ -59,7 +58,7 @@ public class QuestionsController {
         questionEntity = questionRepository.save(questionEntity);
         response.addObject("question", questionEntity);
 
-        questionsSender.sendToPubsub(new JSONObject(questionEntity).toString());
+//        questionsSender.sendToPubsub(new JSONObject(questionEntity).toString());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
