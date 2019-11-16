@@ -47,7 +47,7 @@ public class QuestionsController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response(false, "No match found"));
         }
 
-        return ResponseEntity.ok(new Response(true, "question", question));
+        return ResponseEntity.ok(new Response(true, "question", question.toQuestionModel()));
     }
 
     @PostMapping
@@ -56,7 +56,7 @@ public class QuestionsController {
 
         Response response = new Response(true, "Question has been created");
         questionEntity = questionRepository.save(questionEntity);
-        response.addObject("question", questionEntity);
+        response.addObject("question", questionEntity.toQuestionModel());
 
 //        questionsSender.sendToPubsub(new JSONObject(questionEntity).toString());
 
@@ -76,7 +76,7 @@ public class QuestionsController {
         questionEntity = questionRepository.save(questionEntity);
 
         Response response = new Response(true, "Question upvoted");
-        response.addObject("question", questionEntity);
+        response.addObject("question", questionEntity.toQuestionModel());
 
         return ResponseEntity.ok(response);
     }
@@ -92,7 +92,7 @@ public class QuestionsController {
         questionEntity = questionRepository.save(questionEntity);
 
         Response response = new Response(true, "Question downvoted");
-        response.getData().put("question", questionEntity);
+        response.getData().put("question", questionEntity.toQuestionModel());
 
         return ResponseEntity.ok(response);
     }
@@ -108,7 +108,7 @@ public class QuestionsController {
         String email = "";
 
         questionEntity.addFollowerEmail(email);
-        questionEntity = questionRepository.save(questionEntity);
+        questionRepository.save(questionEntity);
 
         Response response = new Response(true, "Folowing the question");
         return ResponseEntity.ok(response);
