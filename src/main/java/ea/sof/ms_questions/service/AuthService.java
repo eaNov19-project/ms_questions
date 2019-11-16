@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "authms", url = "${AUTH:http://104.154.33.123:8080/auth}" )//)http://104.154.33.123:8080/auth")
+@FeignClient(name = "${feign.name}", url = "${feign.url}")
 public interface AuthService extends MsAuthShowcase {
 
 }
