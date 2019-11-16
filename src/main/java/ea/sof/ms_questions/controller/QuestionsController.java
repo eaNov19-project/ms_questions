@@ -4,8 +4,10 @@ import ea.sof.ms_questions.entity.QuestionEntity;
 import ea.sof.ms_questions.model.QuestionReqModel;
 import ea.sof.ms_questions.pubsub.PubSubQuestionSender;
 import ea.sof.ms_questions.repository.QuestionRepository;
+import ea.sof.ms_questions.service.AuthService;
 import ea.sof.shared.models.Question;
 import ea.sof.shared.models.Response;
+import ea.sof.shared.models.TokenUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
@@ -13,23 +15,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/questions")
+@RequestMapping("/questions")
 public class QuestionsController {
 
     @Autowired
     QuestionRepository questionRepository;
+    @Autowired
+    AuthService authService;
 
 //    @Autowired
 //    PubSubQuestionSender.PubsubOutboundQuestionsGateway questionsSender;
 
     @GetMapping
-    public ResponseEntity<?> getAllQuestions(){
+    public ResponseEntity<?> getAllQuestions() {
         List<QuestionEntity> storedQuestions = questionRepository.findAll();
         List<Question> questions = storedQuestions.stream().map(qe -> qe.toQuestionModel()).collect(Collectors.toList());
 
@@ -40,18 +46,28 @@ public class QuestionsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getQuestionById(@PathVariable("id") String id){
+    public ResponseEntity<?> getQuestionById(@PathVariable("id") String id) {
 
         QuestionEntity question = questionRepository.findById(id).orElse(null);
-        if(question == null) {
+        if (question == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response(false, "No match found"));
         }
 
         return ResponseEntity.ok(new Response(true, "question", question.toQuestionModel()));
     }
 
+
+    //**************REQUIRES AUTHENTICATION**********************//
+
     @PostMapping
-    public ResponseEntity<?> createQuestion(@RequestBody(required = true) @Valid QuestionReqModel question){
+    public ResponseEntity<?> createQuestion(@RequestBody(required = true) @Valid QuestionReqModel question, @RequestHeader("Authorization") String token) {
+
+        //Check if request is authorized
+        Response authCheckResp = isAuthorized(token);
+        if (!authCheckResp.getSuccess()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(false, "Invalid Token"));
+        }
+
         QuestionEntity questionEntity = new QuestionEntity(question);
 
         Response response = new Response(true, "Question has been created");
@@ -65,10 +81,16 @@ public class QuestionsController {
 
 
     @PatchMapping("/{questionId}/upvote")
-    public ResponseEntity<?> upvote(@PathVariable("questionId") String questionId, Model model){
-//        model.getAttribute("tokendata");
+    public ResponseEntity<?> upvote(@PathVariable("questionId") String questionId, @RequestHeader("Authorization") String token) {
+
+        //Check if request is authorized
+        Response authCheckResp = isAuthorized(token);
+        if (!authCheckResp.getSuccess()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(false, "Invalid Token"));
+        }
+
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
-        if(questionEntity == null) {
+        if (questionEntity == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
         }
 
@@ -82,9 +104,16 @@ public class QuestionsController {
     }
 
     @PatchMapping("/{questionId}/downvote")
-    public ResponseEntity<?> downvote(@PathVariable("questionId") String questionId){
+    public ResponseEntity<?> downvote(@PathVariable("questionId") String questionId, @RequestHeader("Authorization") String token) {
+
+        //Check if request is authorized
+        Response authCheckResp = isAuthorized(token);
+        if (!authCheckResp.getSuccess()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(false, "Invalid Token"));
+        }
+
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
-        if(questionEntity == null) {
+        if (questionEntity == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
         }
 
@@ -98,14 +127,22 @@ public class QuestionsController {
     }
 
     @PostMapping("/{questionId}/follow")
-    public ResponseEntity<?> follow(@PathVariable("questionId") String questionId){
+    public ResponseEntity<?> follow(@PathVariable("questionId") String questionId, @RequestHeader("Authorization") String token) {
+
+        //Check if request is authorized
+        Response authCheckResp = isAuthorized(token);
+        if (!authCheckResp.getSuccess()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(false, "Invalid Token"));
+        }
+
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
-        if(questionEntity == null) {
+        if (questionEntity == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
         }
 
-        //TODO: get email from token
-        String email = "";
+        TokenUser decoded_token = (TokenUser) authCheckResp.getData().get("decoded_token");
+        String email = decoded_token.getEmail();
+        System.out.println(email);
 
         questionEntity.addFollowerEmail(email);
         questionRepository.save(questionEntity);
@@ -114,4 +151,21 @@ public class QuestionsController {
         return ResponseEntity.ok(response);
     }
 
+
+    private Response isAuthorized(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return new Response(false, "Invalid token");
+        }
+        try {
+            ResponseEntity<Response> result = authService.validateToken(authHeader);
+
+            if (!result.getBody().getSuccess()) {
+                return new Response(false, "Invalid token");
+            }
+            return result.getBody();
+
+        }catch (Exception e){
+            return new Response(false, "exception", e);
+        }
+    }
 }

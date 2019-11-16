@@ -11,7 +11,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @Data
@@ -29,7 +31,7 @@ public class QuestionEntity {
     private List<CommentQuestionEntity> topComments = new ArrayList<>();
     private List<AnswerEntity> topAnswers = new ArrayList<>();
 
-    private List<String> followerEmails = new ArrayList<>();
+    private Set<String> followerEmails = new HashSet<>();
 
     public QuestionEntity(QuestionReqModel questionModel) {
         this.title = questionModel.getTitle();
