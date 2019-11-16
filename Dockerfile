@@ -1,4 +1,4 @@
-FROM openjdk:8
-COPY target/ms_questions.jar ms_questions.jar
+FROM openjdk:8-jdk-alpine
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","ms_questions.jar"]
+COPY target/ms_questions.jar app.jar
+ENTRYPOINT ["java","-jar","app.jar"]

@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: question-ms
+  labels:
+    app: question-ms
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: question-ms
+  template:
+    metadata:
+      labels:
+        app: question-ms
+
+    spec:
+      containers:
+        - name: question-ms
+          image: islamahmad/question-ms:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KEY1
+              valueFrom:
+                configMapKeyRef:
+                  name: question-ms-config
+                  key: someKey1
+            - name: NEXT_SERVICE
+              valueFrom:
+                configMapKeyRef:
+                  name: question-ms-config
+                  key: nextService
+            - name: SERVICE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: question-ms-secrets
+                  key: service-api-key
+            #MONGODB
+            - name: MONGODB_HOST
+              value: localhost
+
+            - name: MONGODB_USERNAME
+              value: questions
+
+            - name: MONGODB_PORT
+              value: "27017"
+
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: question-ms-secrets
+                  key: mysql-root-password

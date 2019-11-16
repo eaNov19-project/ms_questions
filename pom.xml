@@ -109,9 +109,11 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <finalName>ms_questions</finalName>
+                </configuration>
             </plugin>
         </plugins>
-        <finalName>ms_questions</finalName>
     </build>
 
     <repositories>
