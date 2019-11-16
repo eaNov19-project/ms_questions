@@ -4,8 +4,7 @@ metadata:
   name: question-ms
   namespace: default
 data:
-  SERVICE_API_KEY: apikey
-  MYSQL_HOST: "localhost"
+  MONGODB_HOST: "mongodb-sharded-1573848232.default.svc.cluster.local"
   MONGODB_PORT: "27017"
   MONGODB_PASS: "questions"
   MONGODB_USERNAME: "questions"
