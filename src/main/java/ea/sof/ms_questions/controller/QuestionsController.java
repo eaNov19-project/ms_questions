@@ -1,5 +1,6 @@
 package ea.sof.ms_questions.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ea.sof.ms_questions.entity.QuestionEntity;
 import ea.sof.ms_questions.model.QuestionReqModel;
 import ea.sof.ms_questions.pubsub.PubSubQuestionSender;
@@ -69,6 +70,11 @@ public class QuestionsController {
         }
 
         QuestionEntity questionEntity = new QuestionEntity(question);
+        //TokenUser decodedToken = (TokenUser) authCheckResp.getData().get("decoded_token");
+
+        ObjectMapper mapper = new ObjectMapper();
+        TokenUser decodedToken = mapper.convertValue(authCheckResp.getData().get("decoded_token"), TokenUser.class);
+        questionEntity.setUserId(decodedToken.getUserId().toString());
 
         Response response = new Response(true, "Question has been created");
         questionEntity = questionRepository.save(questionEntity);
@@ -140,7 +146,9 @@ public class QuestionsController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
         }
 
-        TokenUser decoded_token = (TokenUser) authCheckResp.getData().get("decoded_token");
+        //TokenUser decoded_token = (TokenUser) authCheckResp.getData().get("decoded_token");
+        ObjectMapper mapper = new ObjectMapper();
+        TokenUser decoded_token = mapper.convertValue(authCheckResp.getData().get("decoded_token"), TokenUser.class);
         String email = decoded_token.getEmail();
         System.out.println(email);
 
