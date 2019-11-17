@@ -5,7 +5,7 @@ metadata:
   labels:
     app: question-ms
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: question-ms
@@ -51,3 +51,8 @@ spec:
                 configMapKeyRef:
                   name: question-ms
                   key: MONGODB_DATABASE
+            - name: AUTHENTICATE_SERVICE
+                valueFrom:
+                  configMapKeyRef:
+                    name: question-ms
+                    key: AUTHENTICATE_SERVICE
