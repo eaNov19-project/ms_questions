@@ -51,6 +51,33 @@ spec:
                 configMapKeyRef:
                   name: question-ms
                   key: MONGODB_DATABASE
+            #KAFKA
+            - name: TOPIC_NEW_QUESTION
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-global
+                  key: TOPIC_NEW_QUESTION
+            - name: SUBS_NEW_QUESTION_COMMENT_TO_QUESTION
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-global
+                  key: SUBS_NEW_QUESTION_COMMENT_TO_QUESTION
+            - name: SUBS_NEW_ANSWER_COMMENT_TO_QUESTION
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-global
+                  key: SUBS_NEW_ANSWER_COMMENT_TO_QUESTION
+            - name: SUBS_BANE_QUESTION_TO_QUESTION
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-global
+                  key: SUBS_BANE_QUESTION_TO_QUESTION
+            - name: SUBS_UPDATE_QUESTION_COMMENT_TO_QUESTION
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-global
+                  key: SUBS_UPDATE_QUESTION_COMMENT_TO_QUESTION
+
             - name: AUTHENTICATE_SERVICE
                 valueFrom:
                   configMapKeyRef:

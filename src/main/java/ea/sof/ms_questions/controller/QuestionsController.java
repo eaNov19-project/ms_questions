@@ -1,40 +1,66 @@
 package ea.sof.ms_questions.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import ea.sof.ms_questions.entity.QuestionEntity;
 import ea.sof.ms_questions.model.QuestionReqModel;
-import ea.sof.ms_questions.pubsub.PubSubQuestionSender;
 import ea.sof.ms_questions.repository.QuestionRepository;
 import ea.sof.ms_questions.service.AuthService;
+import ea.sof.shared.models.Answer;
 import ea.sof.shared.models.Question;
 import ea.sof.shared.models.Response;
 import ea.sof.shared.models.TokenUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.PrintWriter;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/questions")
 public class QuestionsController {
+	@Autowired
+	private Environment env;
 
-    @Autowired
-    QuestionRepository questionRepository;
-    @Autowired
-    AuthService authService;
+	@Autowired
+	KafkaTemplate<String, String> questionSender;
 
-//    @Autowired
-//    PubSubQuestionSender.PubsubOutboundQuestionsGateway questionsSender;
+	@Autowired
+	QuestionRepository questionRepository;
 
+	@Autowired
+	AuthService authService;
+
+	@GetMapping("/ms-new-question-send/{message}")
+	public ResponseEntity<String> mqNewQuestionSend(@PathVariable("message") String message) {
+//    	Question question = new Question();
+//    	question.setId("1002");
+//		question.setTitle("title");
+//    	question.setBody(message);
+//    	question.setUpvotes(40);
+//
+//        Gson gson = new Gson();
+//		questionSender.send(env.getProperty("topicNewQuestion"), gson.toJson(question));
+
+		Answer answer = new Answer();
+		answer.setId("1029");
+		answer.setBody(message);
+		answer.setUserId("123");
+		answer.setUserName("rustem.bayetov@gmail.com");
+		Gson gson = new Gson();
+		questionSender.send("topicNewAnswer", gson.toJson(answer));
+
+
+		return ResponseEntity.ok("Message sent to successfully");
+	}
+
+    @CrossOrigin
     @GetMapping
     public ResponseEntity<?> getAllQuestions() {
         List<QuestionEntity> storedQuestions = questionRepository.findAll();
@@ -46,6 +72,7 @@ public class QuestionsController {
         return ResponseEntity.ok(response);
     }
 
+    @CrossOrigin
     @GetMapping("/{id}")
     public ResponseEntity<?> getQuestionById(@PathVariable("id") String id) {
 
@@ -60,6 +87,7 @@ public class QuestionsController {
 
     //**************REQUIRES AUTHENTICATION**********************//
 
+    @CrossOrigin
     @PostMapping
     public ResponseEntity<?> createQuestion(@RequestBody(required = true) @Valid QuestionReqModel question, @RequestHeader("Authorization") String token) {
 
@@ -86,6 +114,7 @@ public class QuestionsController {
     }
 
 
+    @CrossOrigin
     @PatchMapping("/{questionId}/upvote")
     public ResponseEntity<?> upvote(@PathVariable("questionId") String questionId, @RequestHeader("Authorization") String token) {
 
@@ -109,6 +138,7 @@ public class QuestionsController {
         return ResponseEntity.ok(response);
     }
 
+    @CrossOrigin
     @PatchMapping("/{questionId}/downvote")
     public ResponseEntity<?> downvote(@PathVariable("questionId") String questionId, @RequestHeader("Authorization") String token) {
 
@@ -132,6 +162,7 @@ public class QuestionsController {
         return ResponseEntity.ok(response);
     }
 
+    @CrossOrigin
     @PostMapping("/{questionId}/follow")
     public ResponseEntity<?> follow(@PathVariable("questionId") String questionId, @RequestHeader("Authorization") String token) {
 
