@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/questions")
 public class QuestionsController {
 
@@ -34,6 +35,7 @@ public class QuestionsController {
 //    @Autowired
 //    PubSubQuestionSender.PubsubOutboundQuestionsGateway questionsSender;
 
+    @CrossOrigin
     @GetMapping
     public ResponseEntity<?> getAllQuestions() {
         List<QuestionEntity> storedQuestions = questionRepository.findAll();
@@ -45,6 +47,7 @@ public class QuestionsController {
         return ResponseEntity.ok(response);
     }
 
+    @CrossOrigin
     @GetMapping("/{id}")
     public ResponseEntity<?> getQuestionById(@PathVariable("id") String id) {
 
@@ -59,6 +62,7 @@ public class QuestionsController {
 
     //**************REQUIRES AUTHENTICATION**********************//
 
+    @CrossOrigin
     @PostMapping
     public ResponseEntity<?> createQuestion(@RequestBody(required = true) @Valid QuestionReqModel question, @RequestHeader("Authorization") String token) {
 
@@ -80,6 +84,7 @@ public class QuestionsController {
     }
 
 
+    @CrossOrigin
     @PatchMapping("/{questionId}/upvote")
     public ResponseEntity<?> upvote(@PathVariable("questionId") String questionId, @RequestHeader("Authorization") String token) {
 
@@ -103,6 +108,7 @@ public class QuestionsController {
         return ResponseEntity.ok(response);
     }
 
+    @CrossOrigin
     @PatchMapping("/{questionId}/downvote")
     public ResponseEntity<?> downvote(@PathVariable("questionId") String questionId, @RequestHeader("Authorization") String token) {
 
@@ -126,6 +132,7 @@ public class QuestionsController {
         return ResponseEntity.ok(response);
     }
 
+    @CrossOrigin
     @PostMapping("/{questionId}/follow")
     public ResponseEntity<?> follow(@PathVariable("questionId") String questionId, @RequestHeader("Authorization") String token) {
 
