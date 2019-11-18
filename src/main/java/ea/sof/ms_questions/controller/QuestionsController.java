@@ -47,9 +47,10 @@ public class QuestionsController {
 
 	private Gson gson = new Gson();
 
-	/*@CrossOrigin
+	@CrossOrigin
 	@GetMapping
-	public ResponseEntity<?> getAllQuestions() {
+	public ResponseEntity<?> getAllQuestions(@RequestParam(value = "page", required = true) Integer page) {
+
 		List<QuestionEntity> storedQuestions = questionRepository.findAll();
 		List<Question> questions = storedQuestions.stream().map(qe -> qe.toQuestionModel()).collect(Collectors.toList());
 
@@ -57,7 +58,7 @@ public class QuestionsController {
 		response.getData().put("questions", questions);
 
 		return ResponseEntity.ok(response);
-	}*/
+	}
 
 	@CrossOrigin
 	@GetMapping("/users/{uid}")

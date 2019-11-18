@@ -1,5 +1,5 @@
-DOCKERHUBREPO=rustembayetov
-IMAGE=${DOCKERHUBREPO}/pays_ba_service
+# DOCKERHUBREPO=islamahmad
+# IMAGE=${DOCKERHUBREPO}/eaproj-ms_questions:1.0.1
 
 # ===== Maven =====
 maven-rebuild:
@@ -7,16 +7,16 @@ maven-rebuild:
 
 # ===== Docker =====
 docker-build: maven-rebuild
-	docker build -t ${IMAGE}:latest .
+	docker build -t islamahmad/eaproj-questionms:1.0.1 .
 
 docker-run:
-	docker run -p 8080:8092 ${IMAGE}
+	docker run -p 8080:8092 islamahmad/eaproj-questionms:1.0.1
 
 docker-login:
 	docker login
 
 docker-push: docker-login docker-build
-	docker push ${IMAGE}
+	docker push islamahmad/eaproj-questionms:1.0.1
 
 k8-install:
 	kubectl apply -f manifests/

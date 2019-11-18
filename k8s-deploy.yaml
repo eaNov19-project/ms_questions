@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: question-ms
-          image: islamahmad/question-ms:1.0.0
+          image: islamahmad/eaproj-questionms:1.0.1
           env:
             - name: SERVER_PORT
               value: "8080"
@@ -107,3 +107,8 @@ spec:
                 configMapKeyRef:
                   name: kafka-global
                   key: TOPIC_BAN_QUESTION
+            - name: SERVICE_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-global
+                  key: SERVICE_SECRET
