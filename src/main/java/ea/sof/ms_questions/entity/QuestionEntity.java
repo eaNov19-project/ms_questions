@@ -24,18 +24,19 @@ import java.util.stream.Collectors;
 @Document(collection = "questions")
 public class QuestionEntity {
 
-    @Id
-    private String id;
-    private String userId;
-    private String title;
-    private String body;
-    private LocalDateTime created;
-    private LocalDateTime lastEdited;
-    private Integer votes = 0;
-    private List<CommentQuestionEntity> topComments = new ArrayList<>();
-    private List<AnswerEntity> topAnswers = new ArrayList<>();
+	@Id
+	private String id;
+	private String userId;
+	private String title;
+	private String body;
+	private LocalDateTime created;
+	private LocalDateTime lastEdited;
+	private Integer votes = 0;
+	private Integer active = 1;
+	private List<CommentQuestionEntity> topComments = new ArrayList<>();
+	private List<AnswerEntity> topAnswers = new ArrayList<>();
 
-    private Set<String> followerEmails = new HashSet<>();
+	private Set<String> followerEmails = new HashSet<>();
 
     private int active = 1;
     public QuestionEntity(QuestionReqModel questionModel) {
@@ -68,6 +69,15 @@ public class QuestionEntity {
 		questionQueueModel.setTitle(this.title);
 		questionQueueModel.setBody(this.body);
 		return questionQueueModel;
+	}
+
+	public QuestionFollowers toQuestionFollowersModel() {
+		QuestionFollowers questionFollowers = new QuestionFollowers();
+		questionFollowers.setId(this.id);
+		questionFollowers.setTitle(this.title);
+		questionFollowers.setFollowerEmails(this.followerEmails);
+
+		return questionFollowers;
 	}
 
 	public void upvote() {

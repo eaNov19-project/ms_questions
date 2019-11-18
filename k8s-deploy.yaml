@@ -25,6 +25,11 @@ spec:
                 configMapKeyRef:
                   name: question-ms
                   key: AUTHENTICATE_SERVICE
+            - name: SERVICE_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-global
+                  key: SERVICE_SECRET
             #MONGODB
             - name: MONGODB_HOST
               valueFrom:
@@ -87,3 +92,18 @@ spec:
                 configMapKeyRef:
                   name: kafka-global
                   key: SUBS_UPDATE_QUESTION_COMMENT_TO_QUESTION
+            - name: TOPIC_NEW_QUESTION_COMMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-global
+                  key: TOPIC_NEW_QUESTION_COMMENT
+            - name: TOPIC_NEW_ANSWER_COMMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-global
+                  key: TOPIC_NEW_ANSWER_COMMENT
+            - name: TOPIC_BAN_QUESTION
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-global
+                  key: TOPIC_BAN_QUESTION
