@@ -32,6 +32,7 @@ public class QuestionEntity {
 	private LocalDateTime created;
 	private LocalDateTime lastEdited;
 	private Integer votes = 0;
+	private Integer active = 1;
 	private List<CommentQuestionEntity> topComments = new ArrayList<>();
 	private List<AnswerEntity> topAnswers = new ArrayList<>();
 
