@@ -37,13 +37,12 @@ public class QuestionEntity {
 
     private Set<String> followerEmails = new HashSet<>();
 
+    private int active = 1;
     public QuestionEntity(QuestionReqModel questionModel) {
         this.title = questionModel.getTitle();
         this.body = questionModel.getBody();
         this.created = LocalDateTime.now();
         this.lastEdited = this.created;
-
-        //TODO: Add user id from logged in user token
     }
 
 
