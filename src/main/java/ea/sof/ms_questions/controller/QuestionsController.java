@@ -47,9 +47,21 @@ public class QuestionsController {
 
 	private Gson gson = new Gson();
 
-	@CrossOrigin
+	/*@CrossOrigin
 	@GetMapping
 	public ResponseEntity<?> getAllQuestions() {
+		List<QuestionEntity> storedQuestions = questionRepository.findAll();
+		List<Question> questions = storedQuestions.stream().map(qe -> qe.toQuestionModel()).collect(Collectors.toList());
+
+		Response response = new Response(true, "");
+		response.getData().put("questions", questions);
+
+		return ResponseEntity.ok(response);
+	}*/
+
+	@CrossOrigin
+	@GetMapping("/users/{uid}")
+	public ResponseEntity<?> getAllQuestionsByUser() {
 		List<QuestionEntity> storedQuestions = questionRepository.findAll();
 		List<Question> questions = storedQuestions.stream().map(qe -> qe.toQuestionModel()).collect(Collectors.toList());
 
@@ -222,6 +234,23 @@ public class QuestionsController {
 		return ResponseEntity.ok(response);
 	}
 
+
+	//******************ENDPOINTS FOR SERVICES*******************//
+	@GetMapping("/{questionId}/followers")
+	ResponseEntity<QuestionFollowers> getFollowersByQuestionId(@PathVariable("questionId") String questionId, HttpServletRequest request){
+		if(!EaUtils.isServiceAuthorized(request, serviceSecret)){
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+
+		QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
+		if(questionEntity == null){
+			System.out.println("Question Followers :: Error. Question entity not found");
+			return ResponseEntity.badRequest().build();
+		}
+
+		return ResponseEntity.ok(questionEntity.toQuestionFollowersModel());
+	}
+
 	private Response isAuthorized(String authHeader) {
 		System.out.print("JWT :: Checking authorization... ");
 
@@ -246,20 +275,5 @@ public class QuestionsController {
 			System.out.println("Failed. " + e.getMessage());
 			return new Response(false, "exception", e);
 		}
-	}
-
-	@GetMapping("/{questionId}/followers")
-	ResponseEntity<QuestionFollowers> getFollowersByQuestionId(@PathVariable("questionId") String questionId, HttpServletRequest request){
-		if(!EaUtils.isServiceAuthorized(request, serviceSecret)){
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-		}
-
-		QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
-		if(questionEntity == null){
-			System.out.println("Question Followers :: Error. Question entity not found");
-			return ResponseEntity.badRequest().build();
-		}
-
-		return ResponseEntity.ok(questionEntity.toQuestionFollowersModel());
 	}
 }
