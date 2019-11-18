@@ -6,6 +6,7 @@ import ea.sof.shared.entities.CommentQuestionEntity;
 import ea.sof.shared.models.CommentAnswer;
 import ea.sof.shared.models.CommentQuestion;
 import ea.sof.shared.models.Question;
+import ea.sof.shared.models.QuestionFollowers;
 import ea.sof.shared.queue_models.QuestionQueueModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,7 +39,6 @@ public class QuestionEntity {
 
 	private Set<String> followerEmails = new HashSet<>();
 
-    private int active = 1;
     public QuestionEntity(QuestionReqModel questionModel) {
         this.title = questionModel.getTitle();
         this.body = questionModel.getBody();
