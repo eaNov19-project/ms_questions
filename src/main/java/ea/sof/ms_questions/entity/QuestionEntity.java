@@ -3,6 +3,8 @@ package ea.sof.ms_questions.entity;
 import ea.sof.ms_questions.model.QuestionReqModel;
 import ea.sof.shared.entities.AnswerEntity;
 import ea.sof.shared.entities.CommentQuestionEntity;
+import ea.sof.shared.models.CommentAnswer;
+import ea.sof.shared.models.CommentQuestion;
 import ea.sof.shared.models.Question;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @Data
@@ -52,6 +55,9 @@ public class QuestionEntity {
         questionModel.setLastEdited(this.lastEdited);
         questionModel.setUpvotes(this.votes);
 
+        List<CommentQuestion> topComments = this.topComments.stream().map(cqe -> cqe.toCommentQuestionModel()).collect(Collectors.toList());
+        questionModel.setTopComments(topComments);
+
         return questionModel;
     }
 
@@ -65,6 +71,15 @@ public class QuestionEntity {
 
     public void addFollowerEmail(String email) {
         followerEmails.add(email);
+    }
+
+    public void addQuestionComment(CommentQuestionEntity commentQuestionEntity) {
+        topComments.add(commentQuestionEntity);
+
+        //remove the oldest
+        while (topComments.size() > 3){
+            topComments.remove(0);
+        }
     }
 
 }
