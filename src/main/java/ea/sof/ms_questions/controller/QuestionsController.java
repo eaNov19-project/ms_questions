@@ -7,10 +7,14 @@ import ea.sof.ms_questions.model.QuestionReqModel;
 import ea.sof.ms_questions.repository.QuestionRepository;
 import ea.sof.ms_questions.service.AuthService;
 import ea.sof.shared.models.Question;
+import ea.sof.shared.models.QuestionFollowers;
 import ea.sof.shared.models.Response;
 import ea.sof.shared.models.TokenUser;
+import ea.sof.shared.utils.EaUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -28,6 +32,9 @@ public class QuestionsController {
 
 	@Autowired
 	private Environment env;
+
+	@Value("service.secret")
+	private String serviceSecret;
 
 	@Autowired
 	KafkaTemplate<String, String> kafkaTemplate;
@@ -239,5 +246,20 @@ public class QuestionsController {
 			System.out.println("Failed. " + e.getMessage());
 			return new Response(false, "exception", e);
 		}
+	}
+
+	@GetMapping("/{questionId}/followers")
+	ResponseEntity<QuestionFollowers> getFollowersByQuestionId(@PathVariable("questionId") String questionId, HttpServletRequest request){
+		if(!EaUtils.isServiceAuthorized(request, serviceSecret)){
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+
+		QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
+		if(questionEntity == null){
+			System.out.println("Question Followers :: Error. Question entity not found");
+			return ResponseEntity.badRequest().build();
+		}
+
+		return ResponseEntity.ok(questionEntity.toQuestionFollowersModel());
 	}
 }
