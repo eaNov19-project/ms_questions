@@ -17,9 +17,14 @@ spec:
       containers:
         - name: question-ms
           image: islamahmad/question-ms:1.0.0
-          ports:
-            - containerPort: 8080
           env:
+            - name: SERVER_PORT
+              value: "8080"
+            - name: AUTHENTICATE_SERVICE
+              valueFrom:
+                configMapKeyRef:
+                  name: question-ms
+                  key: AUTHENTICATE_SERVICE
             #MONGODB
             - name: MONGODB_HOST
               valueFrom:
@@ -52,6 +57,11 @@ spec:
                   name: question-ms
                   key: MONGODB_DATABASE
             #KAFKA
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-global
+                  key: KAFKA_BOOTSTRAP_SERVERS
             - name: TOPIC_NEW_QUESTION
               valueFrom:
                 configMapKeyRef:
@@ -77,9 +87,3 @@ spec:
                 configMapKeyRef:
                   name: kafka-global
                   key: SUBS_UPDATE_QUESTION_COMMENT_TO_QUESTION
-
-            - name: AUTHENTICATE_SERVICE
-                valueFrom:
-                  configMapKeyRef:
-                    name: question-ms
-                    key: AUTHENTICATE_SERVICE

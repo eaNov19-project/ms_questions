@@ -15,20 +15,31 @@ public class SubsNewQuestionCommentToQuestions {
 	QuestionRepository questionRepository;
 
 	@KafkaListener(topics = "${topicNewQuestionComment}", groupId = "${subsNewQuestionCommentToQuestions}")
-	public void newCommentQuestionEntity(String message) {
+	public void listener(String message) {
+		System.out.println("\nSubsNewQuestionCommentToQuestions :: New message from topic 'topicNewQuestionComment': " + message);
 
-		System.out.println("SubsNewQuestionCommentToQuestions: New message from topic: " + message);
-
-		Gson gson = new Gson();
-		CommentQuestionEntity commentQuestionEntity =  gson.fromJson(message, CommentQuestionEntity.class);
+		CommentQuestionEntity commentQuestionEntity = null;
+		try {
+			Gson gson = new Gson();
+			commentQuestionEntity = gson.fromJson(message, CommentQuestionEntity.class);
+		} catch (Exception ex) {
+			System.out.println("SubsNewQuestionCommentToQuestions :: Failed to convert Json: " + ex.getMessage());
+		}
 
 		String questionId = commentQuestionEntity.getQuestionId();
 
 		QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
-		if(questionEntity != null){
+		if (questionEntity == null) {
+			System.out.println("SubsNewQuestionCommentToQuestions :: Failed to retrieve Entity.");
+			return;
+		}
+
+		try {
 			questionEntity.addQuestionComment(commentQuestionEntity);
 			questionRepository.save(questionEntity);
-			System.out.println("Comment added");
+			System.out.println("SubsNewQuestionCommentToQuestions :: Comment added");
+		} catch (Exception ex){
+			System.out.println("SubsNewQuestionCommentToQuestions :: Failed to save Entity: " + ex.getMessage());
 		}
 	}
 

@@ -10,4 +10,4 @@ data:
   MONGODB_USERNAME: "questions"
   MONGODB_DATABASE: "questions"
   MONGODB_AUTH: "questions"
-  AUTHENTICATE_SERVICE: "authentication-service.default.svc.cluster.local:8080"
+  AUTHENTICATE_SERVICE: "auth-ms-service.default.svc.cluster.local:8080"
