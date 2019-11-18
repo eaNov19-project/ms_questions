@@ -29,7 +29,11 @@ public class SubsNewAnswerCommentToQuestions {
 
         String questionId = commentAnswerEntity.getQuestionId();
 
+        if (questionId == null) return;
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
+
+        if (questionEntity == null) return;
+
         List<AnswerEntity> answerEntityList = questionEntity.getTopAnswers();
         for(AnswerEntity answerEntity: answerEntityList) {
             if(answerEntity.getId().equals(answerId)) {

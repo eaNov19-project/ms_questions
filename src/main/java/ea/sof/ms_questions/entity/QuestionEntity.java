@@ -6,6 +6,7 @@ import ea.sof.shared.entities.CommentQuestionEntity;
 import ea.sof.shared.models.CommentAnswer;
 import ea.sof.shared.models.CommentQuestion;
 import ea.sof.shared.models.Question;
+import ea.sof.shared.models.QuestionFollowers;
 import ea.sof.shared.queue_models.QuestionQueueModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,7 @@ public class QuestionEntity {
 	private LocalDateTime created;
 	private LocalDateTime lastEdited;
 	private Integer votes = 0;
+	private Integer active = 1;
 	private List<CommentQuestionEntity> topComments = new ArrayList<>();
 	private List<AnswerEntity> topAnswers = new ArrayList<>();
 
@@ -69,6 +71,15 @@ public class QuestionEntity {
 		questionQueueModel.setTitle(this.title);
 		questionQueueModel.setBody(this.body);
 		return questionQueueModel;
+	}
+
+	public QuestionFollowers toQuestionFollowersModel() {
+		QuestionFollowers questionFollowers = new QuestionFollowers();
+		questionFollowers.setId(this.id);
+		questionFollowers.setTitle(this.title);
+		questionFollowers.setFollowerEmails(this.followerEmails);
+
+		return questionFollowers;
 	}
 
 	public void upvote() {
