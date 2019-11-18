@@ -39,25 +39,23 @@ public class QuestionEntity {
 
 	private Set<String> followerEmails = new HashSet<>();
 
-	public QuestionEntity(QuestionReqModel questionModel) {
-		this.title = questionModel.getTitle();
-		this.body = questionModel.getBody();
-		this.created = LocalDateTime.now();
-		this.lastEdited = this.created;
-
-		//TODO: Add user id from logged in user token
-	}
+    public QuestionEntity(QuestionReqModel questionModel) {
+        this.title = questionModel.getTitle();
+        this.body = questionModel.getBody();
+        this.created = LocalDateTime.now();
+        this.lastEdited = this.created;
+    }
 
 
-	public Question toQuestionModel() {
-		Question questionModel = new Question();
-		questionModel.setId(this.id);
-		questionModel.setUserId(this.userId);
-		questionModel.setTitle(this.title);
-		questionModel.setBody(this.body);
-		questionModel.setCreated(this.created);
-		questionModel.setLastEdited(this.lastEdited);
-		questionModel.setUpvotes(this.votes);
+    public Question toQuestionModel() {
+        Question questionModel = new Question();
+        questionModel.setId(this.id);
+        questionModel.setUserId(this.userId);
+        questionModel.setTitle(this.title);
+        questionModel.setBody(this.body);
+        questionModel.setCreated(this.created);
+        questionModel.setLastEdited(this.lastEdited);
+        questionModel.setUpvotes(this.votes);
 
 		List<CommentQuestion> topComments = this.topComments.stream().map(cqe -> cqe.toCommentQuestionModel()).collect(Collectors.toList());
 		questionModel.setTopComments(topComments);
