@@ -6,6 +6,7 @@ import ea.sof.shared.entities.CommentQuestionEntity;
 import ea.sof.shared.models.CommentAnswer;
 import ea.sof.shared.models.CommentQuestion;
 import ea.sof.shared.models.Question;
+import ea.sof.shared.queue_models.QuestionQueueModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -45,6 +46,7 @@ public class QuestionEntity {
         //TODO: Add user id from logged in user token
     }
 
+
     public Question toQuestionModel() {
         Question questionModel = new Question();
         questionModel.setId(this.id);
@@ -59,6 +61,14 @@ public class QuestionEntity {
         questionModel.setTopComments(topComments);
 
         return questionModel;
+    }
+
+    public QuestionQueueModel toQuestionQueueModel() {
+        QuestionQueueModel questionQueueModel = new QuestionQueueModel();
+        questionQueueModel.setId(this.id);
+        questionQueueModel.setTitle(this.title);
+        questionQueueModel.setBody(this.body);
+        return questionQueueModel;
     }
 
     public void upvote() {

@@ -24,8 +24,9 @@ import java.util.stream.Collectors;
 @CrossOrigin
 @RequestMapping("/questions")
 public class QuestionsController {
-	@Autowired
-	private Environment env;
+
+    @Autowired
+    private Environment env;
 
 	@Autowired
 	KafkaTemplate<String, String> questionSender;
@@ -35,6 +36,8 @@ public class QuestionsController {
 
 	@Autowired
 	AuthService authService;
+
+    private Gson gson = new Gson();
 
 	@GetMapping("/ms-new-question-send/{message}")
 	public ResponseEntity<String> mqNewQuestionSend(@PathVariable("message") String message) {
@@ -102,7 +105,7 @@ public class QuestionsController {
         questionEntity = questionRepository.save(questionEntity);
         response.addObject("question", questionEntity.toQuestionModel());
 
-//        questionsSender.sendToPubsub(new JSONObject(questionEntity).toString());
+        questionSender.send(env.getProperty("topicNewQuestion"), gson.toJson(questionEntity.toQuestionQueueModel()));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
