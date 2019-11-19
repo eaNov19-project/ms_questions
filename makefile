@@ -1,4 +1,4 @@
-img=islamahmad/eaproj-questionms:1.0.3
+img=islamahmad/eaproj-questionms:1.0.6
 
 # ===== Maven =====
 maven-rebuild:
@@ -16,18 +16,21 @@ docker-login:
 
 docker-push: docker-login docker-build
 	docker push ${img}
-
-build:
-	 mvn clean && mvn install && docker build -t ${img} . && docker push $(img)
 k8-install:
 	kubectl apply -f k8s-deploy.yaml
 
-config:
-	kubectl apply -f k8s-config.yaml
 k8-delete:
 	kubectl delete -f k8s-deploy.yaml
 
 k8-restart: k8-delete k8-install
+
+
+
+build:
+	 mvn clean && mvn install && docker build -t ${img} . && docker push $(img)
+
+config:
+	kubectl apply -f k8s-config.yaml
 
 deploy:
 	kubectl apply -f k8s-deploy.yaml
