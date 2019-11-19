@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import ea.sof.ms_questions.entity.QuestionEntity;
 import ea.sof.ms_questions.model.QuestionReqModel;
+import ea.sof.ms_questions.repository.QuestionPaginationRepository;
 import ea.sof.ms_questions.repository.QuestionRepository;
 import ea.sof.ms_questions.service.AuthService;
 import ea.sof.shared.models.Question;
@@ -14,6 +15,9 @@ import ea.sof.shared.utils.EaUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,14 +47,35 @@ public class QuestionsController {
 	QuestionRepository questionRepository;
 
 	@Autowired
+	QuestionPaginationRepository questionPaginationRepository;
+
+	@Autowired
 	AuthService authService;
 
 	private Gson gson = new Gson();
 
-	@CrossOrigin
-	@GetMapping
-	public ResponseEntity<?> getAllQuestions(@RequestParam(value = "page", required = true) Integer page) {
 
+	@CrossOrigin
+	@GetMapping("/")
+	public ResponseEntity<?> getAllQuestions() {
+
+		List<QuestionEntity> storedQuestions = questionRepository.findAll();
+		List<Question> questions = storedQuestions.stream().map(qe -> qe.toQuestionModel()).collect(Collectors.toList());
+
+		Response response = new Response(true, "");
+		response.getData().put("questions", questions);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@CrossOrigin
+	@GetMapping("/{page}")
+	public ResponseEntity<?> getAllQuestionsPaginated(@PathVariable("page") Integer page) {
+
+		Page<QuestionEntity> questionEntities = questionPaginationRepository
+				.findAll(PageRequest.of(0, 10));
+
+	questionEntities.getTotalElements();
 		List<QuestionEntity> storedQuestions = questionRepository.findAll();
 		List<Question> questions = storedQuestions.stream().map(qe -> qe.toQuestionModel()).collect(Collectors.toList());
 
