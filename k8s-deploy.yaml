@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: question-ms
-          image: islamahmad/eaproj-questionms:1.0.5
+          image: islamahmad/eaproj-questionms:1.0.6
           env:
             - name: SERVER_PORT
               value: "8080"
