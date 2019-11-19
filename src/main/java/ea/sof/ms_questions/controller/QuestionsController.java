@@ -74,7 +74,7 @@ public class QuestionsController {
     @GetMapping("/")
     public ResponseEntity<?> getAllQuestions() {
 
-        List<QuestionEntity> storedQuestions = questionRepository.findAll();
+        List<QuestionEntity> storedQuestions = questionRepository.findAllByActiveEquals(1);
         List<Question> questions = storedQuestions.stream().map(qe -> qe.toQuestionModel()).collect(Collectors.toList());
 
         Response response = new Response(true, "");
