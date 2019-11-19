@@ -16,14 +16,14 @@ spec:
     spec:
       containers:
         - name: question-ms
-          image: islamahmad/eaproj-questionms:1.0.2
+          image: islamahmad/eaproj-questionms:1.0.5
           env:
             - name: SERVER_PORT
               value: "8080"
             - name: AUTHENTICATE_SERVICE
               valueFrom:
                 configMapKeyRef:
-                  name: kafka-global
+                  name: question-ms
                   key: AUTHENTICATE_SERVICE
             - name: SERVICE_SECRET
               valueFrom:

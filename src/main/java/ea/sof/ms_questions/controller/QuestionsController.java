@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +56,17 @@ public class QuestionsController {
 
 	private Gson gson = new Gson();
 
+	@GetMapping("/health")
+	public ResponseEntity<?> index() {
+		String host = "Unknown host";
+		try {
+			host = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+
+		return new ResponseEntity<>("Questions service. Host: " + host, HttpStatus.OK);
+	}
 
 	@CrossOrigin
 	@GetMapping("/")
@@ -113,7 +126,7 @@ public class QuestionsController {
 	//**************REQUIRES AUTHENTICATION**********************//
 
 	@CrossOrigin
-	@PostMapping
+	@PostMapping("/")
 	public ResponseEntity<?> createQuestion(@RequestBody(required = true) @Valid QuestionReqModel question, HttpServletRequest request) {
 		System.out.println("CreateQuestion :: New request: " + question.toString());
 
