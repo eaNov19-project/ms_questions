@@ -8,5 +8,6 @@ import java.util.Optional;
 
 public interface QuestionRepository extends MongoRepository<QuestionEntity, String> {
     Optional<QuestionEntity> findById(String id);
+    List<QuestionEntity> findByUserId(String id);
 
 }
