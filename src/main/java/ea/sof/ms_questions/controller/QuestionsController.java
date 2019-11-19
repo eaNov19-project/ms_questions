@@ -2,12 +2,10 @@ package ea.sof.ms_questions.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import ea.sof.ms_questions.entity.QuestionEntity;
 import ea.sof.ms_questions.model.QuestionReqModel;
 import ea.sof.ms_questions.repository.QuestionPaginationRepository;
 import ea.sof.ms_questions.repository.QuestionRepository;
-import ea.sof.ms_questions.interfaces.AuthService;
 import ea.sof.ms_questions.service.AuthServiceCircuitBreaker;
 import ea.sof.shared.models.Question;
 import ea.sof.shared.models.QuestionFollowers;
@@ -15,8 +13,7 @@ import ea.sof.shared.models.Response;
 import ea.sof.shared.models.TokenUser;
 import ea.sof.shared.utils.EaUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -86,7 +83,7 @@ public class QuestionsController {
 		return ResponseEntity.ok(response);
 	}
 
-	@CrossOrigin
+	/*@CrossOrigin
 	@GetMapping("/{page}")
 	public ResponseEntity<?> getAllQuestionsPaginated(@PathVariable("page") Integer page) {
 
@@ -101,7 +98,7 @@ public class QuestionsController {
 		response.getData().put("questions", questions);
 
 		return ResponseEntity.ok(response);
-	}
+	}*/
 
 	@CrossOrigin
 	@GetMapping("/users/{uid}")
@@ -133,7 +130,7 @@ public class QuestionsController {
 	@CrossOrigin
 	@PostMapping("/")
 	public ResponseEntity<?> createQuestion(@RequestBody(required = true) @Valid QuestionReqModel question, HttpServletRequest request) {
-		System.out.println("CreateQuestion :: New request: " + question.toString());
+		log.info("CreateQuestion :: New request: " + question.toString());
 
 		//Check if request is authorized
 		Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
@@ -158,11 +155,11 @@ public class QuestionsController {
 			//
 			kafkaTemplate.send(env.getProperty("topicNewQuestion"), gson.toJson(questionEntity.toQuestionQueueModel()));
 
-			System.out.println("CreateQuestion :: Saved successfully. " + questionEntity.toString());
+			log.info("CreateQuestion :: Saved successfully. " + questionEntity.toString());
 		} catch (Exception ex) {
 			response.setSuccess(false);
 			response.setMessage(ex.getMessage());
-			System.out.println("CreateQuestion :: Error. " + ex.getMessage());
+			log.warn("CreateQuestion :: Error. " + ex.getMessage());
 		}
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -172,7 +169,7 @@ public class QuestionsController {
 	@CrossOrigin
 	@PatchMapping("/{questionId}/upvote")
 	public ResponseEntity<?> upvote(@PathVariable("questionId") String questionId, HttpServletRequest request) {
-		System.out.println("\nUpvote :: New request: " + questionId);
+		log.info("\nUpvote :: New request: " + questionId);
 
 		//Check if request is authorized
 		Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
@@ -217,7 +214,7 @@ public class QuestionsController {
 
 		QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
 		if (questionEntity == null) {
-			System.out.println("Downvote :: Error. Question entity not found");
+			log.warn("Downvote :: Error. Question entity not found");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
 		}
 
@@ -233,7 +230,7 @@ public class QuestionsController {
 		} catch (Exception ex) {
 			response.setSuccess(false);
 			response.setMessage(ex.getMessage());
-			System.out.println("Upvote :: Error. " + ex.getMessage());
+			log.warn("Upvote :: Error. " + ex.getMessage());
 		}
 
 		return ResponseEntity.ok(response);
@@ -247,12 +244,12 @@ public class QuestionsController {
 		//Check if request is authorized
 		Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
 		if (!authCheckResp.getSuccess()) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response(false, "Invalid Token"));
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(authCheckResp);
 		}
 
 		QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
 		if (questionEntity == null) {
-			System.out.println("Follow :: Error. Question entity not found");
+			log.warn("Follow :: Error. Question entity not found");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
 		}
 
@@ -310,7 +307,8 @@ public class QuestionsController {
 			log.info("AuthService replied... ");
 			if (!result.getBody().getSuccess()) {
 				log.warn("Filed to authorize. JWT is invalid");
-				return new Response(false, "Invalid token");
+				return result.getBody();
+//				return new Response(false, "Invalid token");
 			}
 
 			log.info("Authorized successfully");
