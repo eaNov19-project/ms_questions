@@ -40,7 +40,7 @@ public class QuestionsController {
 	@Autowired
 	private Environment env;
 
-	@Value("service.secret")
+	@Value("${service-secret}")
 	private String serviceSecret;
 
 	@Autowired

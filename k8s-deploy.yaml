@@ -23,7 +23,7 @@ spec:
             - name: AUTHENTICATE_SERVICE
               valueFrom:
                 configMapKeyRef:
-                  name: question-ms
+                  name: services-global
                   key: AUTHENTICATE_SERVICE
             - name: SERVICE_SECRET
               valueFrom:
