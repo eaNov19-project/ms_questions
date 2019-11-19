@@ -56,7 +56,7 @@ public class QuestionEntity {
         questionModel.setCreated(this.created);
         questionModel.setLastEdited(this.lastEdited);
         questionModel.setUpvotes(this.votes);
-
+		questionModel.setActive(this.active);
 		List<CommentQuestion> topComments = this.topComments.stream().map(cqe -> cqe.toCommentQuestionModel()).collect(Collectors.toList());
 		questionModel.setTopComments(topComments);
 

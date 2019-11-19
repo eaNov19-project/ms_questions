@@ -28,8 +28,9 @@ spec:
             - name: SERVICE_SECRET
               valueFrom:
                 configMapKeyRef:
-                  name: kafka-global
+                  name: services-global
                   key: SERVICE_SECRET
+
             #MONGODB
             - name: MONGODB_HOST
               valueFrom:
@@ -61,11 +62,12 @@ spec:
                 configMapKeyRef:
                   name: question-ms
                   key: MONGODB_DATABASE
+
             #KAFKA
             - name: KAFKA_BOOTSTRAP_SERVERS
               valueFrom:
                 configMapKeyRef:
-                  name: kafka-global
+                  name: services-global
                   key: KAFKA_BOOTSTRAP_SERVERS
             - name: TOPIC_NEW_QUESTION
               valueFrom:
