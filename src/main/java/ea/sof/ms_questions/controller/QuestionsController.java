@@ -74,6 +74,8 @@ public class QuestionsController {
     @GetMapping("/")
     public ResponseEntity<?> getAllQuestions() {
 
+        //TODO: implement server-side pagination
+        //Returning all records for now
         List<QuestionEntity> storedQuestions = questionRepository.findAllByActiveEquals(1);
         List<Question> questions = storedQuestions.stream().map(qe -> qe.toQuestionModel()).collect(Collectors.toList());
 
