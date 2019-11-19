@@ -28,6 +28,7 @@ public class QuestionEntity {
 	@Id
 	private String id;
 	private String userId;
+	private String userEmail;
 	private String title;
 	private String body;
 	private LocalDateTime created;

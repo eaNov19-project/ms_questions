@@ -167,6 +167,7 @@ public class QuestionsController {
         ObjectMapper mapper = new ObjectMapper();
         TokenUser decodedToken = mapper.convertValue(authCheckResp.getData().get("decoded_token"), TokenUser.class);
         questionEntity.setUserId(decodedToken.getUserId().toString());
+        questionEntity.setUserEmail(decodedToken.getEmail());
 
         Response response = new Response();
         try {
