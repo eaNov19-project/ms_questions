@@ -14,6 +14,7 @@ import ea.sof.shared.models.QuestionFollowers;
 import ea.sof.shared.models.Response;
 import ea.sof.shared.models.TokenUser;
 import ea.sof.shared.utils.EaUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 @RestController
 @CrossOrigin
 @RequestMapping("/questions")
+@Slf4j
 public class QuestionsController {
 
 	@Autowired
@@ -56,7 +58,6 @@ public class QuestionsController {
 	@Autowired
 	AuthServiceCircuitBreaker authService;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(QuestionsController.class);
 
 	private Gson gson = new Gson();
 
@@ -181,7 +182,7 @@ public class QuestionsController {
 
 		QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
 		if (questionEntity == null) {
-			LOGGER.warn("Upvote :: Error. Question entity not found");
+			log.warn("Upvote :: Error. Question entity not found");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
 		}
 
@@ -193,11 +194,11 @@ public class QuestionsController {
 			response = new Response(true, "Question upvoted");
 			response.addObject("question", questionEntity.toQuestionModel());
 
-			LOGGER.info("Upvote :: Saved successfully. " + questionEntity.toString());
+			log.info("Upvote :: Saved successfully. " + questionEntity.toString());
 		} catch (Exception ex) {
 			response.setSuccess(false);
 			response.setMessage(ex.getMessage());
-			LOGGER.warn("Upvote :: Error. " + ex.getMessage());
+			log.warn("Upvote :: Error. " + ex.getMessage());
 		}
 
 		return ResponseEntity.ok(response);
@@ -206,7 +207,7 @@ public class QuestionsController {
 	@CrossOrigin
 	@PatchMapping("/{questionId}/downvote")
 	public ResponseEntity<?> downvote(@PathVariable("questionId") String questionId, HttpServletRequest request) {
-		LOGGER.info("\nDownvote :: New request: " + questionId);
+		log.info("\nDownvote :: New request: " + questionId);
 
 		//Check if request is authorized
 		Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
@@ -228,7 +229,7 @@ public class QuestionsController {
 			response = new Response(true, "Question downvoted");
 			response.addObject("question", questionEntity.toQuestionModel());
 
-			LOGGER.info("Upvote :: Saved successfully. " + questionEntity.toString());
+			log.info("Upvote :: Saved successfully. " + questionEntity.toString());
 		} catch (Exception ex) {
 			response.setSuccess(false);
 			response.setMessage(ex.getMessage());
@@ -241,7 +242,7 @@ public class QuestionsController {
 	@CrossOrigin
 	@PostMapping("/{questionId}/follow")
 	public ResponseEntity<?> follow(@PathVariable("questionId") String questionId, HttpServletRequest request) {
-		LOGGER.info("\nFollow :: New request: " + questionId);
+		log.info("\nFollow :: New request: " + questionId);
 
 		//Check if request is authorized
 		Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
@@ -258,7 +259,7 @@ public class QuestionsController {
         ObjectMapper mapper = new ObjectMapper();
         TokenUser decoded_token = mapper.convertValue(authCheckResp.getData().get("decoded_token"), TokenUser.class);
         String email = decoded_token.getEmail();
-        LOGGER.info("Follow :: User email: " + email);
+        log.info("Follow :: User email: " + email);
         Response response = new Response();
 
 		try {
@@ -267,11 +268,11 @@ public class QuestionsController {
 
 			response = new Response(true, "Following the question");
 
-            LOGGER.info("Follow :: Saved successfully. " + questionEntity.toString());
+            log.info("Follow :: Saved successfully. " + questionEntity.toString());
         } catch (Exception ex) {
 			response.setSuccess(false);
 			response.setMessage(ex.getMessage());
-			LOGGER.warn("Follow :: Error. " + ex.getMessage());
+			log.warn("Follow :: Error. " + ex.getMessage());
 		}
 
 		return ResponseEntity.ok(response);
@@ -296,27 +297,27 @@ public class QuestionsController {
 	}
 
 	private Response isAuthorized(String authHeader) {
-		LOGGER.info("JWT :: Checking authorization... ");
+		log.info("JWT :: Checking authorization... ");
 
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-			LOGGER.warn("Invalid token. Header null or 'Bearer ' is not provided.");
+			log.warn("Invalid token. Header null or 'Bearer ' is not provided.");
 			return new Response(false, "Invalid token");
 		}
 		try {
-			LOGGER.info("Calling authService.validateToken... ");
+			log.info("Calling authService.validateToken... ");
 			ResponseEntity<Response> result = authService.validateToken(authHeader);
 
-			LOGGER.info("AuthService replied... ");
+			log.info("AuthService replied... ");
 			if (!result.getBody().getSuccess()) {
-				LOGGER.warn("Filed to authorize. JWT is invalid");
+				log.warn("Filed to authorize. JWT is invalid");
 				return new Response(false, "Invalid token");
 			}
 
-			LOGGER.info("Authorized successfully");
+			log.info("Authorized successfully");
 			return result.getBody();
 
 		} catch (Exception e) {
-			LOGGER.warn("Failed. " + e.getMessage());
+			log.warn("Failed. " + e.getMessage());
 			return new Response(false, "exception", e);
 		}
 	}
