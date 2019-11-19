@@ -68,7 +68,7 @@ public class QuestionsController {
 		return ResponseEntity.ok(response);
 	}
 
-	@CrossOrigin
+	/*@CrossOrigin
 	@GetMapping("/{page}")
 	public ResponseEntity<?> getAllQuestionsPaginated(@PathVariable("page") Integer page) {
 
@@ -83,7 +83,7 @@ public class QuestionsController {
 		response.getData().put("questions", questions);
 
 		return ResponseEntity.ok(response);
-	}
+	}*/
 
 	@CrossOrigin
 	@GetMapping("/users/{uid}")
