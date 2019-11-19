@@ -2,23 +2,25 @@ package ea.sof.ms_questions.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import ea.sof.ms_questions.entity.QuestionEntity;
 import ea.sof.ms_questions.model.QuestionReqModel;
 import ea.sof.ms_questions.repository.QuestionPaginationRepository;
 import ea.sof.ms_questions.repository.QuestionRepository;
-import ea.sof.ms_questions.service.AuthService;
+import ea.sof.ms_questions.interfaces.AuthService;
+import ea.sof.ms_questions.service.AuthServiceCircuitBreaker;
 import ea.sof.shared.models.Question;
 import ea.sof.shared.models.QuestionFollowers;
 import ea.sof.shared.models.Response;
 import ea.sof.shared.models.TokenUser;
 import ea.sof.shared.utils.EaUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -52,7 +54,9 @@ public class QuestionsController {
 	QuestionPaginationRepository questionPaginationRepository;
 
 	@Autowired
-	AuthService authService;
+	AuthServiceCircuitBreaker authService;
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(QuestionsController.class);
 
 	private Gson gson = new Gson();
 
@@ -177,7 +181,7 @@ public class QuestionsController {
 
 		QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
 		if (questionEntity == null) {
-			System.out.println("Upvote :: Error. Question entity not found");
+			LOGGER.warn("Upvote :: Error. Question entity not found");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
 		}
 
@@ -189,11 +193,11 @@ public class QuestionsController {
 			response = new Response(true, "Question upvoted");
 			response.addObject("question", questionEntity.toQuestionModel());
 
-			System.out.println("Upvote :: Saved successfully. " + questionEntity.toString());
+			LOGGER.info("Upvote :: Saved successfully. " + questionEntity.toString());
 		} catch (Exception ex) {
 			response.setSuccess(false);
 			response.setMessage(ex.getMessage());
-			System.out.println("Upvote :: Error. " + ex.getMessage());
+			LOGGER.warn("Upvote :: Error. " + ex.getMessage());
 		}
 
 		return ResponseEntity.ok(response);
@@ -202,7 +206,7 @@ public class QuestionsController {
 	@CrossOrigin
 	@PatchMapping("/{questionId}/downvote")
 	public ResponseEntity<?> downvote(@PathVariable("questionId") String questionId, HttpServletRequest request) {
-		System.out.println("\nDownvote :: New request: " + questionId);
+		LOGGER.info("\nDownvote :: New request: " + questionId);
 
 		//Check if request is authorized
 		Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
@@ -224,7 +228,7 @@ public class QuestionsController {
 			response = new Response(true, "Question downvoted");
 			response.addObject("question", questionEntity.toQuestionModel());
 
-			System.out.println("Upvote :: Saved successfully. " + questionEntity.toString());
+			LOGGER.info("Upvote :: Saved successfully. " + questionEntity.toString());
 		} catch (Exception ex) {
 			response.setSuccess(false);
 			response.setMessage(ex.getMessage());
@@ -237,7 +241,7 @@ public class QuestionsController {
 	@CrossOrigin
 	@PostMapping("/{questionId}/follow")
 	public ResponseEntity<?> follow(@PathVariable("questionId") String questionId, HttpServletRequest request) {
-		System.out.println("\nFollow :: New request: " + questionId);
+		LOGGER.info("\nFollow :: New request: " + questionId);
 
 		//Check if request is authorized
 		Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
@@ -254,7 +258,7 @@ public class QuestionsController {
         ObjectMapper mapper = new ObjectMapper();
         TokenUser decoded_token = mapper.convertValue(authCheckResp.getData().get("decoded_token"), TokenUser.class);
         String email = decoded_token.getEmail();
-        System.out.println("Follow :: User email: " + email);
+        LOGGER.info("Follow :: User email: " + email);
         Response response = new Response();
 
 		try {
@@ -263,11 +267,11 @@ public class QuestionsController {
 
 			response = new Response(true, "Following the question");
 
-            System.out.println("Follow :: Saved successfully. " + questionEntity.toString());
+            LOGGER.info("Follow :: Saved successfully. " + questionEntity.toString());
         } catch (Exception ex) {
 			response.setSuccess(false);
 			response.setMessage(ex.getMessage());
-			System.out.println("Follow :: Error. " + ex.getMessage());
+			LOGGER.warn("Follow :: Error. " + ex.getMessage());
 		}
 
 		return ResponseEntity.ok(response);
@@ -275,6 +279,7 @@ public class QuestionsController {
 
 
 	//******************ENDPOINTS FOR SERVICES*******************//
+
 	@GetMapping("/{questionId}/followers")
 	ResponseEntity<QuestionFollowers> getFollowersByQuestionId(@PathVariable("questionId") String questionId, HttpServletRequest request){
 		if(!EaUtils.isServiceAuthorized(request, serviceSecret)){
@@ -291,27 +296,27 @@ public class QuestionsController {
 	}
 
 	private Response isAuthorized(String authHeader) {
-		System.out.print("JWT :: Checking authorization... ");
+		LOGGER.info("JWT :: Checking authorization... ");
 
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-			System.out.println("Invalid token. Header null or 'Bearer ' is not provided.");
+			LOGGER.warn("Invalid token. Header null or 'Bearer ' is not provided.");
 			return new Response(false, "Invalid token");
 		}
 		try {
-			System.out.print("Calling authService.validateToken... ");
+			LOGGER.info("Calling authService.validateToken... ");
 			ResponseEntity<Response> result = authService.validateToken(authHeader);
 
-			System.out.print("AuthService replied... ");
+			LOGGER.info("AuthService replied... ");
 			if (!result.getBody().getSuccess()) {
-				System.out.println("Filed to authorize. JWT is invalid");
+				LOGGER.warn("Filed to authorize. JWT is invalid");
 				return new Response(false, "Invalid token");
 			}
 
-			System.out.println("Authorized successfully");
+			LOGGER.info("Authorized successfully");
 			return result.getBody();
 
 		} catch (Exception e) {
-			System.out.println("Failed. " + e.getMessage());
+			LOGGER.warn("Failed. " + e.getMessage());
 			return new Response(false, "exception", e);
 		}
 	}

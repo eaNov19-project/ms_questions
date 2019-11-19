@@ -1,4 +1,4 @@
-package ea.sof.ms_questions.service;
+package ea.sof.ms_questions.interfaces;
 
 import ea.sof.shared.showcases.MsAuthShowcase;
 import org.springframework.cloud.openfeign.FeignClient;

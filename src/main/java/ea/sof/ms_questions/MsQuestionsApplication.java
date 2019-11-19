@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @EnableFeignClients
 @EnableMongoRepositories
 @EnableDiscoveryClient
-//@EnableCircuitBreaker
+@EnableCircuitBreaker
 public class MsQuestionsApplication {
 
     public static void main(String[] args) {
