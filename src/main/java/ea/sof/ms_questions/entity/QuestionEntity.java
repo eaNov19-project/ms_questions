@@ -3,10 +3,7 @@ package ea.sof.ms_questions.entity;
 import ea.sof.ms_questions.model.QuestionReqModel;
 import ea.sof.shared.entities.AnswerEntity;
 import ea.sof.shared.entities.CommentQuestionEntity;
-import ea.sof.shared.models.CommentAnswer;
-import ea.sof.shared.models.CommentQuestion;
-import ea.sof.shared.models.Question;
-import ea.sof.shared.models.QuestionFollowers;
+import ea.sof.shared.models.*;
 import ea.sof.shared.queue_models.QuestionQueueModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -52,6 +49,7 @@ public class QuestionEntity {
         Question questionModel = new Question();
         questionModel.setId(this.id);
         questionModel.setUserId(this.userId);
+        questionModel.setUserEmail(this.userEmail);
         questionModel.setTitle(this.title);
         questionModel.setBody(this.body);
         questionModel.setCreated(this.created);
@@ -60,6 +58,9 @@ public class QuestionEntity {
 		questionModel.setActive(this.active);
 		List<CommentQuestion> topComments = this.topComments.stream().map(cqe -> cqe.toCommentQuestionModel()).collect(Collectors.toList());
 		questionModel.setTopComments(topComments);
+
+		List<Answer> topAnswerModels = this.topAnswers.stream().map(answerEntity -> answerEntity.toAnswerModel()).collect(Collectors.toList());
+		questionModel.setTopAnswers(topAnswerModels);
 
 		return questionModel;
 	}
