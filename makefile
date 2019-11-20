@@ -1,4 +1,4 @@
-img=islamahmad/eaproj-questionms:1.0.9
+img=islamahmad/eaproj-questionms:1.0.10
 
 # ===== Maven =====
 maven-rebuild:
