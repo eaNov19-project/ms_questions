@@ -302,6 +302,37 @@ public class QuestionsController {
         return ResponseEntity.ok(response);
     }
 
+    @CrossOrigin
+    @GetMapping("/{questionId}/checkfollowing")
+    public ResponseEntity<?> checkIfFollowingQuestion(@PathVariable("questionId") String questionId, HttpServletRequest request) {
+        LOGGER.info("CheckIfFollowingQuestion :: New request: " + questionId);
+
+        //Check if request is authorized
+        Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
+        if (!authCheckResp.getSuccess()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(authCheckResp);
+        }
+
+        QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
+        if (questionEntity == null) {
+            LOGGER.warn("CheckIfFollowingQuestion :: Error. Question entity not found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        TokenUser decoded_token = mapper.convertValue(authCheckResp.getData().get("decoded_token"), TokenUser.class);
+        String email = decoded_token.getEmail();
+        LOGGER.info("CheckIfFollowingQuestion :: User email: " + email);
+        Response response = new Response();
+
+        boolean followingTheQuestion = questionEntity.getFollowerEmails().contains(decoded_token.getEmail());
+
+        response.getData().put("folowing", followingTheQuestion);
+
+
+        return ResponseEntity.ok(response);
+    }
+
 
     //******************ENDPOINTS FOR SERVICES*******************//
 
