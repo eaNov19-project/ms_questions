@@ -108,7 +108,7 @@ public class QuestionsController {
     @CrossOrigin
     @GetMapping("/users/{uid}")
     public ResponseEntity<?> getAllQuestionsByUser(HttpServletRequest request) {
-        LOGGER.info("Get All questions for user :: New request");
+
 
         //Check if request is authorized
         Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
