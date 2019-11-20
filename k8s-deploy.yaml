@@ -16,96 +16,34 @@ spec:
     spec:
       containers:
         - name: question-ms
-          image: islamahmad/eaproj-questionms:1.0.10
+          image: islamahmad/eaproj-questionms:1.0.11
           env:
+            - name: APP_VERSION
+              value: "islamahmad/eaproj-questionms:1.0.11"
             - name: SERVER_PORT
               value: "8080"
-            - name: AUTHENTICATE_SERVICE
-              valueFrom:
-                configMapKeyRef:
-                  name: services-global
-                  key: AUTHENTICATE_SERVICE
-            - name: SERVICE_SECRET
-              valueFrom:
-                configMapKeyRef:
-                  name: services-global
-                  key: SERVICE_SECRET
+#            - name: AUTHENTICATE_SERVICE
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: services-global
+#                  key: AUTHENTICATE_SERVICE
+#            - name: SERVICE_SECRET
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: services-global
+#                  key: SERVICE_SECRET
 
             #MONGODB
-            - name: MONGODB_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: question-ms
-                  key: MONGODB_HOST
-            - name: MONGODB_USERNAME
-              valueFrom:
-                configMapKeyRef:
-                  name: question-ms
-                  key: MONGODB_USERNAME
-            - name: MONGODB_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: question-ms
-                  key: MONGODB_PORT
             - name: MONGODB_PASS
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: question-ms
                   key: MONGODB_PASS
-            - name: MONGODB_AUTH
-              valueFrom:
-                configMapKeyRef:
-                  name: question-ms
-                  key: MONGODB_AUTH
-            - name: MONGODB_DATABASE
-              valueFrom:
-                configMapKeyRef:
-                  name: question-ms
-                  key: MONGODB_DATABASE
 
-            #KAFKA
-            - name: KAFKA_BOOTSTRAP_SERVERS
-              valueFrom:
-                configMapKeyRef:
-                  name: services-global
-                  key: KAFKA_BOOTSTRAP_SERVERS
-            - name: TOPIC_NEW_QUESTION
-              valueFrom:
-                configMapKeyRef:
-                  name: kafka-global
-                  key: TOPIC_NEW_QUESTION
-            - name: SUBS_NEW_QUESTION_COMMENT_TO_QUESTION
-              valueFrom:
-                configMapKeyRef:
-                  name: kafka-global
-                  key: SUBS_NEW_QUESTION_COMMENT_TO_QUESTION
-            - name: SUBS_NEW_ANSWER_COMMENT_TO_QUESTION
-              valueFrom:
-                configMapKeyRef:
-                  name: kafka-global
-                  key: SUBS_NEW_ANSWER_COMMENT_TO_QUESTION
-            - name: SUBS_BANE_QUESTION_TO_QUESTION
-              valueFrom:
-                configMapKeyRef:
-                  name: kafka-global
-                  key: SUBS_BANE_QUESTION_TO_QUESTION
-            - name: SUBS_UPDATE_QUESTION_COMMENT_TO_QUESTION
-              valueFrom:
-                configMapKeyRef:
-                  name: kafka-global
-                  key: SUBS_UPDATE_QUESTION_COMMENT_TO_QUESTION
-            - name: TOPIC_NEW_QUESTION_COMMENT
-              valueFrom:
-                configMapKeyRef:
-                  name: kafka-global
-                  key: TOPIC_NEW_QUESTION_COMMENT
-            - name: TOPIC_NEW_ANSWER_COMMENT
-              valueFrom:
-                configMapKeyRef:
-                  name: kafka-global
-                  key: TOPIC_NEW_ANSWER_COMMENT
-            - name: TOPIC_BAN_QUESTION
-              valueFrom:
-                configMapKeyRef:
-                  name: kafka-global
-                  key: TOPIC_BAN_QUESTION
+          envFrom:
+            - configMapRef:
+                name: question-ms
+            - configMapRef:
+                name: services-global
+            - configMapRef:
+                name: kafka-global

@@ -14,11 +14,11 @@ import ea.sof.shared.models.TokenUser;
 import ea.sof.shared.utils.EaUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -34,8 +34,8 @@ import java.util.stream.Collectors;
 @RestController
 @CrossOrigin
 @RequestMapping("/questions")
-@Slf4j
 public class QuestionsController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthServiceCircuitBreaker.class);
 
     @Autowired
     private Environment env;
@@ -58,6 +58,9 @@ public class QuestionsController {
 
     private Gson gson = new Gson();
 
+    @Value("${APP_VERSION}")
+    private String appVersion;
+
     @GetMapping("/health")
     public ResponseEntity<?> index() {
         String host = "Unknown host";
@@ -67,7 +70,7 @@ public class QuestionsController {
             e.printStackTrace();
         }
 
-        return new ResponseEntity<>("Questions service. Host: " + host, HttpStatus.OK);
+        return new ResponseEntity<>("Questions service (" + appVersion + "). Host: " + host, HttpStatus.OK);
     }
 
     @CrossOrigin
@@ -105,7 +108,7 @@ public class QuestionsController {
     @CrossOrigin
     @GetMapping("/users/{uid}")
     public ResponseEntity<?> getAllQuestionsByUser(HttpServletRequest request) {
-        log.info("Get All questions for user :: New request");
+        LOGGER.info("Get All questions for user :: New request");
 
         //Check if request is authorized
         Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
@@ -127,7 +130,7 @@ public class QuestionsController {
         } catch (Exception ex) {
             response.setSuccess(false);
             response.setMessage(ex.getMessage());
-            log.warn("Get all questions for user :: Exception. " + ex.getMessage());
+            LOGGER.warn("Get all questions for user :: Exception. " + ex.getMessage());
         }
 
         return ResponseEntity.ok(response);
@@ -138,6 +141,7 @@ public class QuestionsController {
     @CrossOrigin
     @GetMapping("/{id}")
     public ResponseEntity<?> getQuestionById(@PathVariable("id") String id) {
+        LOGGER.info("Get questions by id: " + id);
 
         QuestionEntity question = questionRepository.findById(id).orElse(null);
         if (question == null) {
@@ -153,7 +157,7 @@ public class QuestionsController {
     @CrossOrigin
     @PostMapping("/")
     public ResponseEntity<?> createQuestion(@RequestBody(required = true) @Valid QuestionReqModel question, HttpServletRequest request) {
-        log.info("CreateQuestion :: New request: " + question.toString());
+        LOGGER.info("CreateQuestion :: New request: " + question.toString());
 
         //Check if request is authorized
         Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
@@ -176,14 +180,13 @@ public class QuestionsController {
             response.setMessage("Question has been created");
             response.addObject("question", questionEntity.toQuestionModel());
 
-            //
             kafkaTemplate.send(env.getProperty("topicNewQuestion"), gson.toJson(questionEntity.toQuestionQueueModel()));
 
-            log.info("CreateQuestion :: Saved successfully. " + questionEntity.toString());
+            LOGGER.info("CreateQuestion :: Saved successfully. " + questionEntity.toString());
         } catch (Exception ex) {
             response.setSuccess(false);
             response.setMessage(ex.getMessage());
-            log.warn("CreateQuestion :: Error. " + ex.getMessage());
+            LOGGER.warn("CreateQuestion :: Error. " + ex.getMessage());
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -193,7 +196,7 @@ public class QuestionsController {
     @CrossOrigin
     @PatchMapping("/{questionId}/upvote")
     public ResponseEntity<?> upvote(@PathVariable("questionId") String questionId, HttpServletRequest request) {
-        log.info("\nUpvote :: New request: " + questionId);
+        LOGGER.info("Upvote :: New request: " + questionId);
 
         //Check if request is authorized
         Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
@@ -203,7 +206,7 @@ public class QuestionsController {
 
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
         if (questionEntity == null) {
-            log.warn("Upvote :: Error. Question entity not found");
+            LOGGER.warn("Upvote :: Error. Question entity not found");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
         }
 
@@ -215,11 +218,11 @@ public class QuestionsController {
             response = new Response(true, "Question upvoted");
             response.addObject("question", questionEntity.toQuestionModel());
 
-            log.info("Upvote :: Saved successfully. " + questionEntity.toString());
+            LOGGER.info("Upvote :: Saved successfully. " + questionEntity.toString());
         } catch (Exception ex) {
             response.setSuccess(false);
             response.setMessage(ex.getMessage());
-            log.warn("Upvote :: Error. " + ex.getMessage());
+            LOGGER.warn("Upvote :: Error. " + ex.getMessage());
         }
 
         return ResponseEntity.ok(response);
@@ -228,7 +231,7 @@ public class QuestionsController {
     @CrossOrigin
     @PatchMapping("/{questionId}/downvote")
     public ResponseEntity<?> downvote(@PathVariable("questionId") String questionId, HttpServletRequest request) {
-        log.info("\nDownvote :: New request: " + questionId);
+        LOGGER.info("Downvote :: New request: " + questionId);
 
         //Check if request is authorized
         Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
@@ -238,7 +241,7 @@ public class QuestionsController {
 
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
         if (questionEntity == null) {
-            log.warn("Downvote :: Error. Question entity not found");
+            LOGGER.warn("Downvote :: Error. Question entity not found");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
         }
 
@@ -250,11 +253,11 @@ public class QuestionsController {
             response = new Response(true, "Question downvoted");
             response.addObject("question", questionEntity.toQuestionModel());
 
-            log.info("Upvote :: Saved successfully. " + questionEntity.toString());
+            LOGGER.info("Upvote :: Saved successfully. " + questionEntity.toString());
         } catch (Exception ex) {
             response.setSuccess(false);
             response.setMessage(ex.getMessage());
-            log.warn("Upvote :: Error. " + ex.getMessage());
+            LOGGER.warn("Upvote :: Error. " + ex.getMessage());
         }
 
         return ResponseEntity.ok(response);
@@ -263,7 +266,7 @@ public class QuestionsController {
     @CrossOrigin
     @PostMapping("/{questionId}/follow")
     public ResponseEntity<?> follow(@PathVariable("questionId") String questionId, HttpServletRequest request) {
-        log.info("\nFollow :: New request: " + questionId);
+        LOGGER.info("Follow :: New request: " + questionId);
 
         //Check if request is authorized
         Response authCheckResp = isAuthorized(request.getHeader("Authorization"));
@@ -273,14 +276,14 @@ public class QuestionsController {
 
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
         if (questionEntity == null) {
-            log.warn("Follow :: Error. Question entity not found");
+            LOGGER.warn("Follow :: Error. Question entity not found");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(false, "No match found"));
         }
 
         ObjectMapper mapper = new ObjectMapper();
         TokenUser decoded_token = mapper.convertValue(authCheckResp.getData().get("decoded_token"), TokenUser.class);
         String email = decoded_token.getEmail();
-        log.info("Follow :: User email: " + email);
+        LOGGER.info("Follow :: User email: " + email);
         Response response = new Response();
 
         try {
@@ -289,11 +292,11 @@ public class QuestionsController {
 
             response = new Response(true, "Following the question");
 
-            log.info("Follow :: Saved successfully. " + questionEntity.toString());
+            LOGGER.info("Follow :: Saved successfully. " + questionEntity.toString());
         } catch (Exception ex) {
             response.setSuccess(false);
             response.setMessage(ex.getMessage());
-            log.warn("Follow :: Error. " + ex.getMessage());
+            LOGGER.warn("Follow :: Error. " + ex.getMessage());
         }
 
         return ResponseEntity.ok(response);
@@ -318,28 +321,28 @@ public class QuestionsController {
     }
 
     private Response isAuthorized(String authHeader) {
-        log.info("JWT :: Checking authorization... ");
+        LOGGER.info("JWT :: Checking authorization... ");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Invalid token. Header null or 'Bearer ' is not provided.");
+            LOGGER.warn("Invalid token. Header null or 'Bearer ' is not provided.");
             return new Response(false, "Invalid token");
         }
         try {
-            log.info("Calling authService.validateToken... ");
+            LOGGER.info("Calling authService.validateToken... ");
             ResponseEntity<Response> result = authService.validateToken(authHeader);
 
-            log.info("AuthService replied... ");
+            LOGGER.info("AuthService replied... ");
             if (!result.getBody().getSuccess()) {
-                log.warn("Filed to authorize. JWT is invalid");
+                LOGGER.warn("Filed to authorize. JWT is invalid");
                 return result.getBody();
 //				return new Response(false, "Invalid token");
             }
 
-            log.info("Authorized successfully");
+            LOGGER.info("Authorized successfully");
             return result.getBody();
 
         } catch (Exception e) {
-            log.warn("Failed. " + e.getMessage());
+            LOGGER.warn("Failed. " + e.getMessage());
             return new Response(false, "exception", e);
         }
     }
