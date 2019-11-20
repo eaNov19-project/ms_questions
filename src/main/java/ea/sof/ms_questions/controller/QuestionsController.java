@@ -58,7 +58,7 @@ public class QuestionsController {
 
     private Gson gson = new Gson();
 
-    @Value("${APP_VERSION}")
+    @Value("${app.version}")
     private String appVersion;
 
     @GetMapping("/health")
