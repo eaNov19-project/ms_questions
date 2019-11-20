@@ -337,7 +337,7 @@ public class QuestionsController {
     //******************ENDPOINTS FOR SERVICES*******************//
 
     @GetMapping("/{questionId}/followers")
-    ResponseEntity<QuestionFollowers> getFollowersByQuestionId(@PathVariable("questionId") String questionId, HttpServletRequest request) {
+    public ResponseEntity<Response> getFollowersByQuestionId(@PathVariable("questionId") String questionId, HttpServletRequest request) {
         if (!EaUtils.isServiceAuthorized(request, serviceSecret)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -345,10 +345,13 @@ public class QuestionsController {
         QuestionEntity questionEntity = questionRepository.findById(questionId).orElse(null);
         if (questionEntity == null) {
             System.out.println("Question Followers :: Error. Question entity not found");
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.ok().body(new Response(false, "Question entity not found"));
         }
 
-        return ResponseEntity.ok(questionEntity.toQuestionFollowersModel());
+        Response response = new Response();
+        response.setValue(questionEntity.toQuestionFollowersModel());
+
+        return ResponseEntity.ok(response);
     }
 
     private Response isAuthorized(String authHeader) {
