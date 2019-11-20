@@ -327,7 +327,7 @@ public class QuestionsController {
 
         boolean followingTheQuestion = questionEntity.getFollowerEmails().contains(decoded_token.getEmail());
 
-        response.getData().put("folowing", followingTheQuestion);
+        response.getData().put("following", followingTheQuestion);
 
 
         return ResponseEntity.ok(response);
