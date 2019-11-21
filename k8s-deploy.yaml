@@ -16,10 +16,10 @@ spec:
     spec:
       containers:
         - name: question-ms
-          image: islamahmad/eaproj-questionms:1.0.15
+          image: islamahmad/eaproj-questionms:1.0.16
           env:
             - name: APP_VERSION
-              value: "islamahmad/eaproj-questionms:1.0.15"
+              value: "islamahmad/eaproj-questionms:1.0.16"
             - name: SERVER_PORT
               value: "8080"
 
